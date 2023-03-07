@@ -23,7 +23,7 @@ var vaultUrl = "https://myHashicorpVault.com";
 var authMethodInfo = new TokenAuthMethodInfo(token);
 var options = new VaultOptions();
 
-builder.Services.AddVault(new Uri(vaultUri), authMethodInfo, options);
+builder.Host.ConfigureAppConfiguration(cb => cb.AddVault(new Uri(vaultUri), authMethodInfo, options));
 builder.Services.AddHealthChecks().AddVault(new Uri(vaultUri), authMethodInfo);
 ```
 There is also an overload of AddVault where you can directly add the VaultSharp client.
@@ -35,7 +35,7 @@ All auth methods of VaultSharp are supported. See docs for further details: http
 
 * VaultKeyPrefix: Used as value prefix and prefix for the internally created setting keys, that contain the vault keys. The default is "VaultKey--".
 * ReloadInterval: If set, the reload from vault is enabled
-* OmitMissingSecrets: Per default an exception is thrown if a settings key is missing in vault. If set to true the value of the setting will be left empty for missing vault secrets.
+* OmitMissingSecrets: Per default, an exception is thrown if a settings key is missing in vault. If set to true the value of the setting will be left empty for missing vault secrets.
 
 
 ## Example appsettings configuration:
@@ -49,3 +49,9 @@ All auth methods of VaultSharp are supported. See docs for further details: http
 The first part has to be the prefix configured in VaultOptions or if nothing set "VaultKey--". The vault keys can be added with "kv-v2/data/" or without.
 
 Remark: Internally there will be added additional settings keys that hold the vault key. The setting key names are prefixed with the VaultKeyPrefix. e.g. MyCustomPrefix--PasswordTwo. These settings are below the same parent key.
+
+## Watch for changes and get current value:
+
+Use the IOptionsMonitor interface for that. IOptions is only initialized once.
+
+You can find additional information here: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-7.0#options-interfaces
