@@ -34,7 +34,7 @@ All auth methods of VaultSharp are supported. See docs for further details: http
 ## VaultOptions:
 
 * VaultKeyPrefix: Used as value prefix and prefix for the internally created setting keys, that contain the vault keys. The default is "VaultKey--".
-* ReloadInterval: If set, the reload from vault is enabled
+* ReloadInterval: If set, the reload from vault is enabled. Per default, the reload is disabled.
 * OmitMissingSecrets: Per default, an exception is thrown if a settings key is missing in vault. If set to true the value of the setting will be left empty for missing vault secrets.
 
 
