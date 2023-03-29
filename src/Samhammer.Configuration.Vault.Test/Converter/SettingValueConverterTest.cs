@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using NSubstitute;
 using Samhammer.Configuration.Vault.Converter;
 using Xunit;
 
@@ -32,6 +33,20 @@ namespace Samhammer.Configuration.Vault.Test.Converter
 
             // Assert
             actual.Should().Be(expected);
+        }
+
+        [Fact]
+        public void IsVaultPrefixedSettingValue_WithExceptionOnValue()
+        {
+            // Arrange
+            var setting = Substitute.For<IConfigurationSection>();
+            setting.Value.Returns(x => throw new Exception("value cant be accessed"));
+
+            // Act
+            var actual = SettingValueConverter.IsVaultPrefixedSettingValue(setting, Prefix);
+
+            // Assert
+            actual.Should().Be(false);
         }
 
         [Theory]

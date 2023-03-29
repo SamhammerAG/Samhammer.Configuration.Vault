@@ -7,9 +7,21 @@ namespace Samhammer.Configuration.Vault.Converter
     {
         public static bool IsVaultPrefixedSettingValue(IConfigurationSection setting, string prefix)
         {
-            return setting.Value?.Length > prefix.Length
-            && !setting.Value.EndsWith("/")
-            && setting.Value.StartsWith(prefix);
+            string value;
+
+            try
+            {
+                value = setting.Value;
+            }
+            catch
+            {
+                // when previous configurationSource raises an error on the value, e.g. ConfigurationSubstitutor could not replace some placeholders
+                return false;
+            }
+
+            return value?.Length > prefix.Length
+                   && !value.EndsWith("/")
+                   && value.StartsWith(prefix);
         }
 
         public static string RemoveVaultPrefixFromSettingValue(IConfigurationSection setting, string prefix)
