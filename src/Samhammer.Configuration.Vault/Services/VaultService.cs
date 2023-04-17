@@ -8,7 +8,7 @@ using VaultSharp.V1.Commons;
 
 namespace Samhammer.Configuration.Vault.Services
 {
-    internal class VaultService : IVaultService
+    public class VaultService : IVaultService
     {
         private readonly IVaultClient _client;
 
@@ -23,7 +23,7 @@ namespace Samhammer.Configuration.Vault.Services
             var secretPath = shortKey.Remove(shortKey.LastIndexOf('/'));
             var secretKeyName = shortKey.Split('/').Last();
 
-            SecretData secretData = await GetSecret(secretPath);
+            var (statusCode, secretData) = await GetSecret(secretPath);
 
             if (secretData == null)
             {
@@ -32,7 +32,15 @@ namespace Samhammer.Configuration.Vault.Services
                     return fallbackValue;
                 }
 
-                throw new Exception($"Secret '{secretPath}' not found");
+                switch (statusCode)
+                {
+                    case (int)HttpStatusCode.NotFound:
+                        throw new Exception($"Secret '{secretPath}' not found");
+                    case (int)HttpStatusCode.Forbidden:
+                        throw new Exception($"Access denied for secret '{secretPath}'");
+                    default:
+                        throw new Exception($"Unexpected error when accessing secret '{secretPath}' with status code: '{statusCode}'");
+                }
             }
 
             var isExistingKey = secretData.Data.TryGetValue(secretKeyName, out var keyValue);
@@ -44,25 +52,24 @@ namespace Samhammer.Configuration.Vault.Services
                     return fallbackValue;
                 }
 
-                throw new Exception($"Secret '{secretPath}' does not contain a key '{secretKeyName}'");
+                throw new Exception($"Secret '{secretPath}' key '{secretKeyName}' not found");
             }
 
             return keyValue.ToString();
         }
 
-        private async Task<SecretData> GetSecret(string secretPath)
+        private async Task<(int StatusCode, SecretData Data)> GetSecret(string secretPath)
         {
             try
             {
                 Secret<SecretData> existingSecret = await _client.V1.Secrets.KeyValue.V2.ReadSecretAsync(secretPath);
-                return existingSecret.Data;
+                return ((int)HttpStatusCode.OK, existingSecret.Data);
             }
             catch (VaultApiException e)
             {
-                // Secret not existing
-                if (e.StatusCode == (int)HttpStatusCode.NotFound)
+                if (!(e.StatusCode >= 200 && e.StatusCode <= 299))
                 {
-                    return null;
+                    return (e.StatusCode, null);
                 }
 
                 throw;
