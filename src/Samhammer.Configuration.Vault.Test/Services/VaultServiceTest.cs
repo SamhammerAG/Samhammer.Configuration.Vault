@@ -34,7 +34,7 @@ public class VaultServiceTest
         var existingSecret = new Secret<SecretData> { Data = expectedData };
 
         VaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync("myproject/myfolder/mysecret").Returns(existingSecret);
-            
+
         // Act
         var result = await VaultService.GetValue("kv-v2/data/myproject/myfolder/mysecret/Password", string.Empty);
 
@@ -44,8 +44,8 @@ public class VaultServiceTest
 
     [Theory]
     [InlineData(HttpStatusCode.NotFound, "myproject/myfolder/notFound", "Secret 'myproject/myfolder/notFound' not found")]
-    [InlineData(HttpStatusCode.Forbidden, "myproject/myfolder/forbidden", "Does not have permission to access Secret 'myproject/myfolder/forbidden'")]
-    [InlineData(HttpStatusCode.BadRequest, "myproject/myfolder/badRequest", "Unexpected error when accessing 'myproject/myfolder/badRequest' with status code: '400'")]
+    [InlineData(HttpStatusCode.Forbidden, "myproject/myfolder/forbidden", "Access denied for secret 'myproject/myfolder/forbidden'")]
+    [InlineData(HttpStatusCode.BadRequest, "myproject/myfolder/badRequest", "Unexpected error when accessing secret 'myproject/myfolder/badRequest' with status code: '400'")]
     public async Task GetValue_Exception_ReturnsNull(HttpStatusCode statusCode, string path, string expectedMessage)
     {
         // Arrange
@@ -53,8 +53,8 @@ public class VaultServiceTest
         VaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path).ThrowsAsync(exception);
 
         // Act
-        var exceptionResult = await Assert.ThrowsAsync<Exception>(async () => await VaultService.GetValue($"kv-v2/data/{path}/Password", null));
-            
+        var exceptionResult = await Assert.ThrowsAsync<Exception>(() => VaultService.GetValue($"kv-v2/data/{path}/Password", null));
+
         // Assert
         Assert.Equal(expectedMessage, exceptionResult.Message);
     }
