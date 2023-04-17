@@ -37,9 +37,9 @@ namespace Samhammer.Configuration.Vault.Services
                     case (int)HttpStatusCode.NotFound:
                         throw new Exception($"Secret '{secretPath}' not found");
                     case (int)HttpStatusCode.Forbidden:
-                        throw new Exception($"Does not have permission to access Secret '{secretPath}'");
+                        throw new Exception($"Access denied for secret '{secretPath}'");
                     default:
-                        throw new Exception($"Unexpected error when accessing '{secretPath}' with status code: '{statusCode}'");
+                        throw new Exception($"Unexpected error when accessing secret '{secretPath}' with status code: '{statusCode}'");
                 }
             }
 
@@ -52,7 +52,7 @@ namespace Samhammer.Configuration.Vault.Services
                     return fallbackValue;
                 }
 
-                throw new Exception($"Secret '{secretPath}' does not contain a key '{secretKeyName}'");
+                throw new Exception($"Secret '{secretPath}' key '{secretKeyName}' not found");
             }
 
             return keyValue.ToString();
