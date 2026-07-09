@@ -72,6 +72,12 @@ namespace Samhammer.Configuration.Vault.Sag.Services
         private static IAuthMethodInfo GetLocalAuthMethodInfo()
         {
             var token = ProcessExecutionService.RunCliProcess("vault", "print token");
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                throw new Exception("No vault token found. Please login with 'vault login'.");
+            }
+
             return new TokenAuthMethodInfo(token);
         }
     }

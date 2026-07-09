@@ -35,6 +35,8 @@ All auth methods of VaultSharp are supported. See docs for further details: http
 * ReloadInterval: If set, the reload from vault is enabled. Per default, the reload is **disabled**.
 * OmitMissingSecrets: Per default, an exception is thrown if a settings key is missing in vault. If set to true the value of the setting will be left empty for missing vault secrets.
 
+When the token auth method is used, the token is verified on startup (auth/token/lookup-self) to fail fast on an invalid or expired token. Tokens from other auth methods (e.g. kubernetes) are freshly minted on login, so there is nothing to verify.
+
 
 ## Example appsettings configuration:
 ```json
