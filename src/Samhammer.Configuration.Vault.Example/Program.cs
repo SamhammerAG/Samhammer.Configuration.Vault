@@ -7,7 +7,7 @@ using Samhammer.Configuration.Vault.Sag;
 
 var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = args, ContentRootPath = AppContext.BaseDirectory });
 
-// AddAuthenticatedVault gets the vault url and credentials on its own (kubernetes / sagctl).
+// AddAuthenticatedVault gets the vault url and credentials on its own (kubernetes / vault cli).
 builder.Configuration.AddAuthenticatedVault(new VaultOptions());
 builder.Services.Configure<MyOptions>(builder.Configuration.GetSection("MyOptions"));
 

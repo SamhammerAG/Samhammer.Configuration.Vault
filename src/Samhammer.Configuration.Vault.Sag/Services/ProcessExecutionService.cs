@@ -24,8 +24,6 @@ namespace Samhammer.Configuration.Vault.Sag.Services
                 },
             };
 
-            process.StartInfo.Environment["DOTNET_ENVIRONMENT"] = "Production";
-
             process.OutputDataReceived += (sender, e) => outputBuilder.Append(e.Data);
             process.ErrorDataReceived += (sender, e) => errorBuilder.Append(e.Data);
 
