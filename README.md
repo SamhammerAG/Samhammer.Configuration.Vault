@@ -1,4 +1,4 @@
-# Samhammer.Configuration.Vault
+﻿# Samhammer.Configuration.Vault
 
 This library can be used if you want to load specific keys from vault. This is done by configuring the vault key as value.
 
@@ -14,16 +14,14 @@ https://github.com/MrZoidberg/VaultSharp.Extensions.Configuration
 - use vault keys in your appsettings
 
 
-## Example Program.cs:
+### How to use in Program.cs
 
 ```csharp
-var builder = WebApplication.CreateBuilder(args);
-
 var vaultUrl = "https://myHashicorpVault.com";
 var authMethodInfo = new TokenAuthMethodInfo(token);
 var options = new VaultOptions();
 
-builder.Host.ConfigureAppConfiguration(cb => cb.AddVault(new Uri(vaultUri), authMethodInfo, options));
+builder.Configuration.AddVault(new Uri(vaultUri), authMethodInfo, options);
 builder.Services.AddHealthChecks().AddVault(new Uri(vaultUri), authMethodInfo);
 ```
 There is also an overload of AddVault where you can directly add the VaultSharp client.
@@ -34,7 +32,7 @@ All auth methods of VaultSharp are supported. See docs for further details: http
 ## VaultOptions:
 
 * VaultKeyPrefix: Used as value prefix and prefix for the internally created setting keys, that contain the vault keys. The default is "VaultKey--".
-* ReloadInterval: If set, the reload from vault is enabled. Per default, the reload is disabled.
+* ReloadInterval: If set, the reload from vault is enabled. Per default, the reload is **disabled**.
 * OmitMissingSecrets: Per default, an exception is thrown if a settings key is missing in vault. If set to true the value of the setting will be left empty for missing vault secrets.
 
 
@@ -54,4 +52,45 @@ Remark: Internally there will be added additional settings keys that hold the va
 
 Use the IOptionsMonitor interface for that. IOptions is only initialized once.
 
+This would also need ReloadInterval to be configured. But this reload can cause **heavy load** on vault if you have a lot of settings. So use it with care.
+
 You can find additional information here: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-7.0#options-interfaces
+
+
+## Authenticated Vault (Samhammer.Configuration.Vault.Sag)
+
+This is an internally used convenience library to add Samhammer.Configuration.Vault.
+
+It does the following in addition:
+* Locally: Uses the url and token returned by sagctl
+* Kubernetes: Does a kubernetes role auth
+
+### Prerequirements
+
+#### Locally
+
+Sagctl has to be installed: https://samhammer.atlassian.net/wiki/spaces/K8S/pages/158793743/How+to+use+sagctl
+
+#### In the cluster
+
+Use following environment variables for configuration:
+* VaultUrl: With the url to vault (required)
+* VaultKubernetesRole: The vault role of the application (required)
+* VaultDisabled: When true skips adding vault and healthchecks. (optional)
+
+## How to add this to your project:
+
+- reference this package to your main project: https://www.nuget.org/packages/Samhammer.Configuration.Vault.Sag
+
+### How to use in Program.cs
+
+```csharp
+builder.Configuration
+        .AddAuthenticatedVault(vaultOptions);
+
+builder.Services
+        .AddHealthChecks()
+        .AddAuthenticatedVault();
+```
+
+See the [VaultOptions](#vaultoptions) section above for the available vault options.
