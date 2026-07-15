@@ -35,6 +35,8 @@ All auth methods of VaultSharp are supported. See docs for further details: http
 * ReloadInterval: If set, the reload from vault is enabled. Per default, the reload is **disabled**.
 * OmitMissingSecrets: Per default, an exception is thrown if a settings key is missing in vault. If set to true the value of the setting will be left empty for missing vault secrets.
 
+When the token auth method is used, the token is verified on startup (auth/token/lookup-self) to fail fast on an invalid or expired token. Tokens from other auth methods (e.g. kubernetes) are freshly minted on login, so there is nothing to verify.
+
 
 ## Example appsettings configuration:
 ```json
@@ -62,14 +64,17 @@ You can find additional information here: https://learn.microsoft.com/en-us/aspn
 This is an internally used convenience library to add Samhammer.Configuration.Vault.
 
 It does the following in addition:
-* Locally: Uses the url and token returned by sagctl
+* Locally: Uses the url from the VAULT_ADDR environment variable and the token returned by the Vault CLI (`vault print token`)
 * Kubernetes: Does a kubernetes role auth
 
 ### Prerequirements
 
 #### Locally
 
-Sagctl has to be installed: https://samhammer.atlassian.net/wiki/spaces/K8S/pages/158793743/How+to+use+sagctl
+The HashiCorp Vault CLI has to be installed and you have to be logged in (`vault login`): https://developer.hashicorp.com/vault/docs/commands
+
+Use following environment variables for configuration:
+* VAULT_ADDR: With the url to vault (required)
 
 #### In the cluster
 

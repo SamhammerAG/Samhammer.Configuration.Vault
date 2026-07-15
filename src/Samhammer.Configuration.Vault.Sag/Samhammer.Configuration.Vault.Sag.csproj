@@ -8,8 +8,8 @@
   <PropertyGroup>
     <Company>Samhammer AG</Company>
     <Authors>Samhammer AG</Authors>
-    <PackageProjectUrl>https://github.com/SamhammerAG/Samhammer.Configuration.Vault.Sag</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/SamhammerAG/Samhammer.Configuration.Vault.Sag</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/SamhammerAG/Samhammer.Configuration.Vault</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SamhammerAG/Samhammer.Configuration.Vault</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Description>Load configuration from hashicorp vault</Description>

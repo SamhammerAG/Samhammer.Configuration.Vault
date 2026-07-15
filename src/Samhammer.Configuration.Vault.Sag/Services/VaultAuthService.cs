@@ -9,16 +9,17 @@ namespace Samhammer.Configuration.Vault.Sag.Services
     public static class VaultAuthService
     {
         private const string KubernetesServiceAccountJwtFile = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-        
+
         private const string EnvironmentVariableNameVaultDisabled = "VaultDisabled";
         private const string EnvironmentVariableNameVaultUrl = "VaultUrl";
+        private const string EnvironmentVariableNameVaultAddr = "VAULT_ADDR";
         private const string EnvironmentVariableNameKubernetesRole = "VaultKubernetesRole";
-        
+
         public static string GetVaultUrl()
         {
             var vaultUrl = IsRunningInKubernetesCluster()
                 ? Environment.GetEnvironmentVariable(EnvironmentVariableNameVaultUrl)
-                : ProcessExecutionService.RunCliProcess("sagctl", "vault get url");
+                : Environment.GetEnvironmentVariable(EnvironmentVariableNameVaultAddr);
 
             if (string.IsNullOrEmpty(vaultUrl))
             {
@@ -70,7 +71,13 @@ namespace Samhammer.Configuration.Vault.Sag.Services
 
         private static IAuthMethodInfo GetLocalAuthMethodInfo()
         {
-            var token = ProcessExecutionService.RunCliProcess("sagctl", "vault get token");
+            var token = ProcessExecutionService.RunCliProcess("vault", "print token");
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                throw new Exception("No vault token found. Please login with 'vault login'.");
+            }
+
             return new TokenAuthMethodInfo(token);
         }
     }

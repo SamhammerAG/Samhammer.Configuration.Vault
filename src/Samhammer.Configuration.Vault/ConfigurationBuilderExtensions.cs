@@ -37,9 +37,30 @@ namespace Samhammer.Configuration.Vault
                 throw new ArgumentException($"Don't use '{ConfigurationPath.KeyDelimiter}' (dotnet section delimiter) as part of the prefix");
             }
 
+            // Only a directly provided token can be stale on startup. Tokens from other auth methods
+            // (e.g. kubernetes) are freshly minted on login, so there is nothing to verify up front.
+            if (client.Settings.AuthMethodInfo?.AuthMethodType == AuthMethodType.Token)
+            {
+                VerifyToken(client);
+            }
+
             configurationBuilder.Add(new ChainedVaultConfigurationSource(configurationBuilder.Build(), client, options));
 
             return configurationBuilder;
+        }
+
+        private static void VerifyToken(IVaultClient client)
+        {
+            try
+            {
+                // Looks up the current token to fail fast on an invalid or expired token
+                // instead of surfacing an unclear error later when a secret is read.
+                client.V1.Auth.Token.LookupSelfAsync().GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("The vault token is invalid or expired. Please login with 'vault login'.", e);
+            }
         }
     }
 }
